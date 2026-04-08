@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}Prescriptions{% endblock %}
+{% block page_icon %}💊{% endblock %}
+{% block page_title %}Prescriptions{% endblock %}
+
+{% block content %}
+<div class="two-col">
+
+  <!-- ══════════════════════════════════════
+       PRESCRIPTIONS LIST
+  ══════════════════════════════════════ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">💊 All Prescriptions ({{ prescriptions|length }})</span>
+      <!-- Patient filter -->
+      <select id="rx-patient-filter" class="btn btn-ghost btn-sm"
+              style="padding:6px 10px; font-size:12px; cursor:pointer;">
+        <option value="">All Patients</option>
+        {% for p in patients %}
+          <option value="{{ p.patient_id }}">{{ p.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Patient</th>
+            <th>Doctor</th>
+            <th>Date</th>
+            <th>Medicines</th>
+            <th>Dosage</th>
+            <th>Instructions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if prescriptions %}
+            {% for rx in prescriptions %}
+            <tr class="rx-row" data-appt-id="{{ rx.appointment_id }}">
+              <td><code>Rx-{{ rx.prescription_id }}</code></td>
+              <td><strong>{{ rx.patient_name }}</strong></td>
+              <td>{{ rx.doctor_name }}</td>
+              <td>{{ rx.prescribed_date }}</td>
+              <td style="max-width:200px;">{{ rx.medicines }}</td>
+              <td style="max-width:160px; font-size:12px;">{{ rx.dosage }}</td>
+              <td style="max-width:200px; font-size:12px; color:var(--text-secondary);">
+                {{ rx.instructions or '—' }}
+              </td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="7">
+                <div class="empty-state">
+                  <div class="empty-icon">💊</div>
+                  <p>No prescriptions added yet. Complete an appointment first.</p>
+                </div>
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       ADD PRESCRIPTION FORM
+  ══════════════════════════════════════ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">➕ Add Prescription</span>
+    </div>
+    <div class="card-body">
+
+      {% if eligible_appointments %}
+        <form method="POST" action="{{ url_for('add_prescription') }}" data-validate="true">
+
+          <div class="form-group">
+            <label for="rx-appt">Completed Appointment</label>
+            <select id="rx-appt" name="appointment_id" required>
+              <option value="">-- Select Appointment --</option>
+              {% for a in eligible_appointments %}
+                <option value="{{ a.appointment_id }}">
+                  {{ a.patient_name }} → {{ a.doctor_name }} ({{ a.appointment_date }})
+                </option>
+              {% endfor %}
+            </select>
+            <div class="field-error"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="rx-meds">Medicines</label>
+            <textarea id="rx-meds" name="medicines"
+                      placeholder="e.g. Aspirin 75mg, Metformin 500mg" required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="rx-dosage">Dosage Instructions</label>
+            <textarea id="rx-dosage" name="dosage"
+                      placeholder="e.g. 1 tablet after breakfast, 1 at night" required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="rx-notes">Additional Notes <span class="text-muted">(optional)</span></label>
+            <textarea id="rx-notes" name="instructions"
+                      placeholder="e.g. Avoid alcohol. Follow up in 2 weeks."></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-warning btn-block">
+            💊 Save Prescription
+          </button>
+        </form>
+      {% else %}
+        <div class="empty-state" style="padding:30px 10px;">
+          <div class="empty-icon">✅</div>
+          <p>All completed appointments already have a prescription,
+             or no appointments have been completed yet.</p>
+          <a href="{{ url_for('appointments') }}" class="btn btn-info mt-2">
+            Go to Appointments
+          </a>
+        </div>
+      {% endif %}
+
+    </div>
+  </div>
+
+</div><!-- /two-col -->
+{% endblock %}

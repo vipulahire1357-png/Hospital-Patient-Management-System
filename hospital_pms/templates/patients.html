@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block title %}Patients{% endblock %}
+{% block page_icon %}🧑‍🤝‍🧑{% endblock %}
+{% block page_title %}Patients{% endblock %}
+
+{% block content %}
+<div class="two-col">
+
+  <!-- ══════════════════════════════════════
+       PATIENT LIST
+  ══════════════════════════════════════ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">🧑‍🤝‍🧑 Registered Patients ({{ patients|length }})</span>
+    </div>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Age / Gender</th>
+            <th>Phone</th>
+            <th>Blood Group</th>
+            <th>Registered</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if patients %}
+            {% for p in patients %}
+            <tr>
+              <td><code>P-{{ p.patient_id }}</code></td>
+              <td>
+                <strong>{{ p.name }}</strong><br>
+                <span class="text-muted">{{ p.address[:35] }}{% if p.address|length > 35 %}…{% endif %}</span>
+              </td>
+              <td>{{ p.age }} yrs / {{ p.gender }}</td>
+              <td>{{ p.phone }}</td>
+              <td>
+                <span class="badge badge-primary">{{ p.blood_group }}</span>
+              </td>
+              <td>{{ p.created_at[:10] }}</td>
+              <td>
+                <div class="action-btns">
+                  <a href="{{ url_for('patient_history', patient_id=p.patient_id) }}"
+                     class="btn btn-info btn-xs">📋 History</a>
+
+                  <a href="{{ url_for('edit_patient', patient_id=p.patient_id) }}"
+                     class="btn btn-warning btn-xs">✏️ Edit</a>
+
+                  <form method="POST"
+                        action="{{ url_for('delete_patient', patient_id=p.patient_id) }}"
+                        style="display:inline">
+                    <button type="submit" class="btn btn-danger btn-xs"
+                            data-confirm="Delete patient {{ p.name }}? This will remove all related records.">
+                      🗑️ Delete
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="7">
+                <div class="empty-state">
+                  <div class="empty-icon">🧑‍🤝‍🧑</div>
+                  <p>No patients registered yet. Use the form to add the first patient.</p>
+                </div>
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       REGISTER PATIENT FORM
+  ══════════════════════════════════════ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">➕ Register New Patient</span>
+    </div>
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('add_patient') }}" data-validate="true">
+
+        <div class="form-group">
+          <label for="pat-name">Full Name</label>
+          <input type="text" id="pat-name" name="name"
+                 placeholder="e.g. Arjun Mehta" required />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="pat-age">Age</label>
+            <input type="number" id="pat-age" name="age"
+                   min="1" max="149" placeholder="e.g. 35"
+                   required data-type="age" />
+          </div>
+          <div class="form-group">
+            <label for="pat-gender">Gender</label>
+            <select id="pat-gender" name="gender" required>
+              <option value="">-- Select --</option>
+              <option>Male</option>
+              <option>Female</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="pat-phone">Mobile Number</label>
+          <input type="tel" id="pat-phone" name="phone"
+                 placeholder="10-digit number" required data-type="phone" />
+        </div>
+
+        <div class="form-group">
+          <label for="pat-address">Address</label>
+          <textarea id="pat-address" name="address"
+                    placeholder="Full address" required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="pat-blood">Blood Group</label>
+          <select id="pat-blood" name="blood_group" required>
+            <option value="">-- Select --</option>
+            {% for bg in ['A+','A-','B+','B-','AB+','AB-','O+','O-'] %}
+              <option>{{ bg }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" style="margin-top:8px">
+          ✅ Register Patient
+        </button>
+      </form>
+    </div>
+  </div>
+
+</div><!-- /two-col -->
+{% endblock %}

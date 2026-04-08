@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Schedule – {{ doctor.name }}{% endblock %}
+{% block page_icon %}📅{% endblock %}
+{% block page_title %}Doctor Schedule{% endblock %}
+
+{% block content %}
+<div class="card mb-3">
+  <div class="card-header">
+    <span class="card-title">
+      👨‍⚕️ {{ doctor.name }}
+      <span class="badge badge-primary" style="margin-left:8px">{{ doctor.specialization }}</span>
+    </span>
+    <a href="{{ url_for('doctors') }}" class="btn btn-ghost btn-sm">← Back</a>
+  </div>
+  <div class="card-body">
+    <div class="form-row">
+      <div><span class="text-muted">Phone</span><br><strong>{{ doctor.phone }}</strong></div>
+      <div><span class="text-muted">Email</span><br><strong>{{ doctor.email }}</strong></div>
+      <div><span class="text-muted">Schedule</span><br><strong>{{ doctor.schedule }}</strong></div>
+      <div><span class="text-muted">Consultation Fee</span><br><strong>₹{{ "%.0f"|format(doctor.consultation_fee) }}</strong></div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">📋 Appointment Schedule ({{ schedule|length }})</span>
+  </div>
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Time</th>
+          <th>Patient</th>
+          <th>Age / Gender</th>
+          <th>Phone</th>
+          <th>Reason</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if schedule %}
+          {% for s in schedule %}
+          <tr>
+            <td>{{ s.appointment_date }}</td>
+            <td>{{ s.time_slot }}</td>
+            <td><strong>{{ s.patient_name }}</strong></td>
+            <td>{{ s.age }} / {{ s.gender }}</td>
+            <td>{{ s.patient_phone }}</td>
+            <td>{{ s.reason }}</td>
+            <td>
+              {% if s.status == 'scheduled' %}
+                <span class="badge badge-info">📅 Scheduled</span>
+              {% elif s.status == 'completed' %}
+                <span class="badge badge-success">✅ Completed</span>
+              {% else %}
+                <span class="badge badge-danger">❌ Cancelled</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="7">
+              <div class="empty-state">
+                <div class="empty-icon">📅</div>
+                <p>No appointments scheduled for this doctor yet.</p>
+              </div>
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

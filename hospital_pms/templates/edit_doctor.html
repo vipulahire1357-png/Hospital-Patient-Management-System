@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Edit Doctor{% endblock %}
+{% block page_icon %}✏️{% endblock %}
+{% block page_title %}Edit Doctor{% endblock %}
+
+{% block content %}
+<div style="max-width:600px; margin:0 auto;">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">✏️ Edit — {{ doctor.name }}</span>
+      <a href="{{ url_for('doctors') }}" class="btn btn-ghost btn-sm">← Back</a>
+    </div>
+    <div class="card-body">
+      <form method="POST"
+            action="{{ url_for('edit_doctor', doctor_id=doctor.doctor_id) }}"
+            data-validate="true">
+
+        <div class="form-group">
+          <label for="ed-name">Full Name</label>
+          <input type="text" id="ed-name" name="name" value="{{ doctor.name }}" required />
+        </div>
+
+        <div class="form-group">
+          <label for="ed-spec">Specialization</label>
+          <input type="text" id="ed-spec" name="specialization"
+                 value="{{ doctor.specialization }}" required list="spec-list2" />
+          <datalist id="spec-list2">
+            {% for s in ['Cardiology','Neurology','Orthopedics','General Medicine',
+                         'Dermatology','Pediatrics','Gynecology','Ophthalmology',
+                         'ENT','Psychiatry','Oncology','Urology'] %}
+              <option value="{{ s }}">
+            {% endfor %}
+          </datalist>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="ed-phone">Phone</label>
+            <input type="tel" id="ed-phone" name="phone"
+                   value="{{ doctor.phone }}" required data-type="phone" />
+          </div>
+          <div class="form-group">
+            <label for="ed-fee">Consultation Fee (₹)</label>
+            <input type="number" id="ed-fee" name="consultation_fee"
+                   value="{{ doctor.consultation_fee }}" min="0" step="50"
+                   required data-type="positive" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="ed-email">Email</label>
+          <input type="email" id="ed-email" name="email" value="{{ doctor.email }}" required />
+        </div>
+
+        <div class="form-group">
+          <label for="ed-schedule">Schedule</label>
+          <input type="text" id="ed-schedule" name="schedule" value="{{ doctor.schedule }}" required />
+        </div>
+
+        <div style="display:flex; gap:12px; margin-top:8px;">
+          <button type="submit" class="btn btn-primary" style="flex:1">💾 Save Changes</button>
+          <a href="{{ url_for('doctors') }}" class="btn btn-ghost" style="flex:1; justify-content:center;">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

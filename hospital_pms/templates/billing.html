@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block title %}Billing{% endblock %}
+{% block page_icon %}💳{% endblock %}
+{% block page_title %}Billing{% endblock %}
+
+{% block content %}
+<div class="two-col">
+
+  <!-- ══════════════════════════════════════
+       BILLS LIST
+  ══════════════════════════════════════ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">💳 All Bills ({{ bills|length }})</span>
+    </div>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Patient</th>
+            <th>Doctor</th>
+            <th>Appt Date</th>
+            <th>Consult (₹)</th>
+            <th>Meds (₹)</th>
+            <th>Other (₹)</th>
+            <th>Total (₹)</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if bills %}
+            {% for b in bills %}
+            <tr>
+              <td><code>B-{{ b.bill_id }}</code></td>
+              <td><strong>{{ b.patient_name }}</strong></td>
+              <td>{{ b.doctor_name }}</td>
+              <td>{{ b.appointment_date }}</td>
+              <td>{{ "%.0f"|format(b.consultation_fee) }}</td>
+              <td>{{ "%.0f"|format(b.medicine_charges) }}</td>
+              <td>{{ "%.0f"|format(b.other_charges) }}</td>
+              <td><strong>₹{{ "%.0f"|format(b.total_amount) }}</strong></td>
+              <td>
+                {% if b.payment_status == 'paid' %}
+                  <span class="badge badge-success">✅ Paid</span>
+                {% elif b.payment_status == 'pending' %}
+                  <span class="badge badge-warning">⏳ Pending</span>
+                {% else %}
+                  <span class="badge badge-danger">❌ Cancelled</span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="action-btns">
+                  <a href="{{ url_for('view_bill', bill_id=b.bill_id) }}"
+                     class="btn btn-info btn-xs" target="_blank">🖨️ View</a>
+
+                  {% if b.payment_status == 'pending' %}
+                    <form method="POST"
+                          action="{{ url_for('mark_paid', bill_id=b.bill_id) }}"
+                          style="display:inline">
+                      <button type="submit" class="btn btn-secondary btn-xs"
+                              data-confirm="Mark this bill as paid?">
+                        ✅ Pay
+                      </button>
+                    </form>
+                    <form method="POST"
+                          action="{{ url_for('cancel_bill', bill_id=b.bill_id) }}"
+                          style="display:inline">
+                      <button type="submit" class="btn btn-danger btn-xs"
+                              data-confirm="Cancel this bill?">
+                        ❌
+                      </button>
+                    </form>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="10">
+                <div class="empty-state">
+                  <div class="empty-icon">💳</div>
+                  <p>No bills generated yet.</p>
+                </div>
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       GENERATE BILL FORM
+  ══════════════════════════════════════ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">➕ Generate Bill</span>
+    </div>
+    <div class="card-body">
+
+      {% if unbilled_appointments %}
+        <form method="POST" action="{{ url_for('generate_bill') }}" data-validate="true">
+
+          <!-- Appointment selector -->
+          <div class="form-group">
+            <label for="bill_appointment_id">Completed Appointment</label>
+            <select id="bill_appointment_id" name="appointment_id" required>
+              <option value="">-- Select Appointment --</option>
+              {% for a in unbilled_appointments %}
+                <option value="{{ a.appointment_id }}"
+                        data-fee="{{ a.consultation_fee }}">
+                  {{ a.patient_name }} → {{ a.doctor_name }} ({{ a.appointment_date }}) — ₹{{ "%.0f"|format(a.consultation_fee) }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Consultation fee (auto-filled, readonly) -->
+          <div class="form-group">
+            <label for="bill_consultation_fee">Consultation Fee (₹) <span class="text-muted">(auto-filled)</span></label>
+            <input type="number" id="bill_consultation_fee" name="consultation_fee"
+                   value="0" min="0" step="1" readonly
+                   style="background:var(--primary-light); color:var(--primary-dark); font-weight:600;" />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="bill_medicine_charges">Medicine Charges (₹)</label>
+              <input type="number" id="bill_medicine_charges" name="medicine_charges"
+                     value="0" min="0" step="1" data-type="positive" />
+            </div>
+            <div class="form-group">
+              <label for="bill_other_charges">Other Charges (₹)</label>
+              <input type="number" id="bill_other_charges" name="other_charges"
+                     value="0" min="0" step="1" data-type="positive" />
+            </div>
+          </div>
+
+          <!-- Live total display -->
+          <div style="background:var(--bg); border-radius:var(--radius-md); padding:14px;
+                      display:flex; justify-content:space-between; align-items:center;
+                      margin-bottom:16px; border:1px solid var(--border);">
+            <span style="font-size:14px; font-weight:600; color:var(--text-secondary);">
+              Estimated Total
+            </span>
+            <span id="bill_total_display"
+                  style="font-size:22px; font-weight:800; color:var(--primary);">
+              ₹0.00
+            </span>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block">
+            💳 Generate Bill
+          </button>
+        </form>
+      {% else %}
+        <div class="empty-state" style="padding:30px 10px;">
+          <div class="empty-icon">✅</div>
+          <p>No unbilled completed appointments. Complete an appointment first.</p>
+          <a href="{{ url_for('appointments') }}" class="btn btn-info mt-2">
+            Go to Appointments
+          </a>
+        </div>
+      {% endif %}
+
+    </div>
+  </div>
+
+</div><!-- /two-col -->
+{% endblock %}

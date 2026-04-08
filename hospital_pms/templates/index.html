@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_icon %}📊{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- ══════════════════════════════════════
+     STAT CARDS
+══════════════════════════════════════ -->
+<div class="stats-grid">
+
+  <div class="stat-card blue">
+    <div class="stat-icon">🧑‍🤝‍🧑</div>
+    <div>
+      <div class="stat-value">{{ stats.total_patients }}</div>
+      <div class="stat-label">Total Patients</div>
+    </div>
+  </div>
+
+  <div class="stat-card green">
+    <div class="stat-icon">👨‍⚕️</div>
+    <div>
+      <div class="stat-value">{{ stats.total_doctors }}</div>
+      <div class="stat-label">Registered Doctors</div>
+    </div>
+  </div>
+
+  <div class="stat-card orange">
+    <div class="stat-icon">📅</div>
+    <div>
+      <div class="stat-value">{{ stats.todays_appointments }}</div>
+      <div class="stat-label">Today's Appointments</div>
+    </div>
+  </div>
+
+  <div class="stat-card red">
+    <div class="stat-icon">💳</div>
+    <div>
+      <div class="stat-value">{{ stats.pending_bills }}</div>
+      <div class="stat-label">Pending Bills</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════
+     RECENT APPOINTMENTS + QUICK LINKS
+══════════════════════════════════════ -->
+<div class="recent-grid">
+
+  <!-- Recent Appointments -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">📋 Recent Appointments</span>
+      <a href="{{ url_for('appointments') }}" class="btn btn-ghost btn-sm">View All</a>
+    </div>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>Patient</th>
+            <th>Doctor</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if recent %}
+            {% for appt in recent %}
+            <tr>
+              <td><strong>{{ appt.patient_name }}</strong></td>
+              <td>{{ appt.doctor_name }}</td>
+              <td>{{ appt.appointment_date }}</td>
+              <td>{{ appt.time_slot }}</td>
+              <td>
+                {% if appt.status == 'scheduled' %}
+                  <span class="badge badge-info">📅 Scheduled</span>
+                {% elif appt.status == 'completed' %}
+                  <span class="badge badge-success">✅ Completed</span>
+                {% else %}
+                  <span class="badge badge-danger">❌ Cancelled</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="5" class="text-center text-muted" style="padding:30px">
+                No appointments yet
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">⚡ Quick Actions</span>
+    </div>
+    <div class="card-body">
+      <div style="display:flex; flex-direction:column; gap:12px;">
+
+        <a href="{{ url_for('patients') }}" class="btn btn-primary btn-block">
+          🧑‍🤝‍🧑 &nbsp; Register New Patient
+        </a>
+        <a href="{{ url_for('doctors') }}" class="btn btn-secondary btn-block">
+          👨‍⚕️ &nbsp; Add New Doctor
+        </a>
+        <a href="{{ url_for('appointments') }}" class="btn btn-info btn-block">
+          📅 &nbsp; Book Appointment
+        </a>
+        <a href="{{ url_for('prescriptions') }}" class="btn btn-warning btn-block">
+          💊 &nbsp; Add Prescription
+        </a>
+        <a href="{{ url_for('billing') }}" class="btn btn-ghost btn-block">
+          💳 &nbsp; Generate Bill
+        </a>
+
+      </div>
+    </div>
+
+    <!-- System summary -->
+    <div class="card-header mt-2" style="border-top:1px solid var(--border); border-bottom:none;">
+      <span class="card-title">🏥 System Summary</span>
+    </div>
+    <div class="card-body">
+      <table class="bill-detail-table" style="font-size:13px;">
+        <tr>
+          <td>Total Patients</td>
+          <td><strong>{{ stats.total_patients }}</strong></td>
+        </tr>
+        <tr>
+          <td>Total Doctors</td>
+          <td><strong>{{ stats.total_doctors }}</strong></td>
+        </tr>
+        <tr>
+          <td>Appointments Today</td>
+          <td><strong>{{ stats.todays_appointments }}</strong></td>
+        </tr>
+        <tr>
+          <td>Pending Payments</td>
+          <td><strong class="text-danger">{{ stats.pending_bills }}</strong></td>
+        </tr>
+      </table>
+    </div>
+
+  </div>
+
+</div><!-- /recent-grid -->
+
+{% endblock %}

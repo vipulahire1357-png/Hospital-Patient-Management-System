@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Medical History – {{ patient.name }}{% endblock %}
+{% block page_icon %}📋{% endblock %}
+{% block page_title %}Medical History{% endblock %}
+
+{% block content %}
+<div class="card mb-3">
+  <div class="card-header">
+    <span class="card-title">
+      🧑 {{ patient.name }}
+      <span class="badge badge-primary" style="margin-left:8px">{{ patient.blood_group }}</span>
+    </span>
+    <a href="{{ url_for('patients') }}" class="btn btn-ghost btn-sm">← Back to Patients</a>
+  </div>
+  <div class="card-body">
+    <div class="form-row">
+      <div>
+        <span class="text-muted">Age / Gender</span><br>
+        <strong>{{ patient.age }} yrs / {{ patient.gender }}</strong>
+      </div>
+      <div>
+        <span class="text-muted">Phone</span><br>
+        <strong>{{ patient.phone }}</strong>
+      </div>
+      <div>
+        <span class="text-muted">Address</span><br>
+        <strong>{{ patient.address }}</strong>
+      </div>
+      <div>
+        <span class="text-muted">Registered On</span><br>
+        <strong>{{ patient.created_at[:10] }}</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3 style="margin-bottom:16px; font-size:16px;">📝 Visit History ({{ history|length }} records)</h3>
+
+{% if history %}
+  {% for visit in history %}
+  <div class="history-card">
+    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+      <div>
+        <div class="history-date">{{ visit.appointment_date }} · {{ visit.time_slot }}</div>
+        <strong>{{ visit.doctor_name }}</strong>
+        <span class="text-muted" style="margin-left:6px">— {{ visit.specialization }}</span>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+        {% if visit.status == 'scheduled' %}
+          <span class="badge badge-info">📅 Scheduled</span>
+        {% elif visit.status == 'completed' %}
+          <span class="badge badge-success">✅ Completed</span>
+        {% else %}
+          <span class="badge badge-danger">❌ Cancelled</span>
+        {% endif %}
+
+        {% if visit.payment_status == 'paid' %}
+          <span class="badge badge-success">💰 Paid</span>
+        {% elif visit.payment_status == 'pending' %}
+          <span class="badge badge-warning">⏳ Pending ₹{{ visit.total_amount }}</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div style="margin-top:10px; color:var(--text-secondary); font-size:13px;">
+      📌 <strong>Reason:</strong> {{ visit.reason }}
+    </div>
+
+    {% if visit.medicines %}
+    <div style="margin-top:10px; background:var(--primary-light); border-radius:var(--radius-md); padding:12px;">
+      <strong style="color:var(--primary)">💊 Prescription</strong>
+      <div style="margin-top:8px; font-size:13px; display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+        <div><span class="text-muted">Medicines:</span> {{ visit.medicines }}</div>
+        <div><span class="text-muted">Dosage:</span> {{ visit.dosage }}</div>
+        {% if visit.instructions %}
+        <div style="grid-column:1/-1"><span class="text-muted">Instructions:</span> {{ visit.instructions }}</div>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+  {% endfor %}
+{% else %}
+  <div class="empty-state">
+    <div class="empty-icon">📋</div>
+    <p>No visit history found for this patient.</p>
+    <a href="{{ url_for('appointments') }}" class="btn btn-primary mt-2">Book First Appointment</a>
+  </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}Bill #{{ bill.bill_id }}{% endblock %}
+{% block page_icon %}🖨️{% endblock %}
+{% block page_title %}Bill Details{% endblock %}
+
+{% block content %}
+<div style="max-width:680px; margin:0 auto;">
+
+  <!-- Print button -->
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;" class="no-print">
+    <a href="{{ url_for('billing') }}" class="btn btn-ghost btn-sm">← Back to Billing</a>
+    <button onclick="window.print()" class="btn btn-primary btn-sm">🖨️ Print Bill</button>
+  </div>
+
+  <div class="card">
+    <!-- Header -->
+    <div style="background:var(--primary); border-radius:var(--radius-lg) var(--radius-lg) 0 0;
+                padding:24px 28px; color:#fff;">
+      <div style="display:flex; justify-content:space-between; align-items:start;">
+        <div>
+          <h1 style="font-size:22px; font-weight:800; margin-bottom:4px;">🏥 MediCare Hospital</h1>
+          <p style="opacity:.8; font-size:13px;">Patient Management System</p>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:24px; font-weight:800;">BILL</div>
+          <div style="opacity:.8; font-size:13px;">#B-{{ bill.bill_id }}</div>
+          <div style="opacity:.8; font-size:12px; margin-top:4px;">{{ bill.bill_date }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-body">
+
+      <!-- Patient & Doctor info -->
+      <div class="form-row" style="margin-bottom:20px;">
+        <div style="background:var(--bg); padding:14px; border-radius:var(--radius-md);">
+          <div class="text-muted" style="margin-bottom:6px; font-size:11px; font-weight:700; text-transform:uppercase;">Patient</div>
+          <strong>{{ bill.patient_name }}</strong><br>
+          <span class="text-muted">{{ bill.patient_phone }}</span><br>
+          <span class="text-muted" style="font-size:12px;">{{ bill.patient_address }}</span>
+        </div>
+        <div style="background:var(--bg); padding:14px; border-radius:var(--radius-md);">
+          <div class="text-muted" style="margin-bottom:6px; font-size:11px; font-weight:700; text-transform:uppercase;">Doctor</div>
+          <strong>{{ bill.doctor_name }}</strong><br>
+          <span class="text-muted">{{ bill.specialization }}</span><br>
+          <span class="text-muted" style="font-size:12px;">📅 {{ bill.appointment_date }} · {{ bill.time_slot }}</span>
+        </div>
+      </div>
+
+      <!-- Appointment details -->
+      <div style="background:var(--primary-light); padding:12px 16px; border-radius:var(--radius-md); margin-bottom:20px;">
+        <strong style="color:var(--primary);">📌 Reason:</strong>
+        <span style="color:var(--primary-dark); margin-left:6px;">{{ bill.reason }}</span>
+      </div>
+
+      <!-- Charge breakdown -->
+      <table class="bill-detail-table" style="margin-bottom:0;">
+        <tbody>
+          <tr>
+            <td style="padding:10px 0; border-bottom:1px solid var(--border);">Consultation Fee</td>
+            <td style="padding:10px 0; border-bottom:1px solid var(--border); text-align:right;">
+              ₹{{ "%.2f"|format(bill.consultation_fee) }}
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:10px 0; border-bottom:1px solid var(--border);">Medicine Charges</td>
+            <td style="padding:10px 0; border-bottom:1px solid var(--border); text-align:right;">
+              ₹{{ "%.2f"|format(bill.medicine_charges) }}
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:10px 0; border-bottom:1px solid var(--border);">Other Charges</td>
+            <td style="padding:10px 0; border-bottom:1px solid var(--border); text-align:right;">
+              ₹{{ "%.2f"|format(bill.other_charges) }}
+            </td>
+          </tr>
+          <tr class="bill-total-row">
+            <td style="padding:14px 16px; border-radius:0 0 0 var(--radius-md);">
+              <strong>TOTAL AMOUNT</strong>
+            </td>
+            <td style="padding:14px 16px; text-align:right; border-radius:0 0 var(--radius-md) 0;">
+              <strong>₹{{ "%.2f"|format(bill.total_amount) }}</strong>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Payment Status -->
+      <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:14px; font-weight:600;">Payment Status</span>
+        {% if bill.payment_status == 'paid' %}
+          <span class="badge badge-success" style="font-size:13px; padding:6px 16px;">✅ PAID</span>
+        {% elif bill.payment_status == 'pending' %}
+          <span class="badge badge-warning" style="font-size:13px; padding:6px 16px;">⏳ PENDING</span>
+        {% else %}
+          <span class="badge badge-danger" style="font-size:13px; padding:6px 16px;">❌ CANCELLED</span>
+        {% endif %}
+      </div>
+
+      <!-- Action buttons -->
+      {% if bill.payment_status == 'pending' %}
+      <div style="display:flex; gap:12px; margin-top:20px;" class="no-print">
+        <form method="POST" action="{{ url_for('mark_paid', bill_id=bill.bill_id) }}" style="flex:1;">
+          <button type="submit" class="btn btn-secondary btn-block"
+                  data-confirm="Mark this bill as paid?">
+            ✅ Mark as Paid
+          </button>
+        </form>
+        <form method="POST" action="{{ url_for('cancel_bill', bill_id=bill.bill_id) }}" style="flex:1;">
+          <button type="submit" class="btn btn-danger btn-block"
+                  data-confirm="Cancel this bill?">
+            ❌ Cancel Bill
+          </button>
+        </form>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}
