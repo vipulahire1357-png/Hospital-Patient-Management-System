@@ -211,7 +211,7 @@ python app.py        # Start the server
 
 ## 👥 Team / Author
 
-- **Author**: [Your Name]  
-- **Roll No**: [Your Roll Number]  
+- **Author**: Vipul Ahire  
+- **Roll No**: 03  
 - **Subject**: Database Management Systems  
 - **Academic Year**: 2024–25
